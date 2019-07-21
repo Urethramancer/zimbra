@@ -1,6 +1,11 @@
 package zimbra
 
-import "gopkg.in/ldap.v3"
+import (
+	"fmt"
+
+	"github.com/Urethramancer/signor/uuid"
+	"gopkg.in/ldap.v3"
+)
 
 func (zc *ZimbraLDAP) getAccounts(scope string) ([]string, error) {
 	req := ldap.NewSearchRequest(scope, ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
@@ -31,4 +36,29 @@ func (zc *ZimbraLDAP) GetUsersInDomain(domain string) ([]string, error) {
 	}
 
 	return zc.getAccounts(d.BindDN)
+}
+
+// AddUser with one e-mail address.
+func (zc *ZimbraLDAP) AddUser(email, gn, sn string) error {
+	u, err := NewUser(email)
+	if err != nil {
+		return err
+	}
+
+	req := ldap.NewAddRequest(u.BindDN, nil)
+	req.Attribute("uid", []string{u.Name})
+	req.Attribute("mail", []string{email})
+	if gn != "" {
+		req.Attribute("givenName", []string{gn})
+	}
+	if sn != "" {
+		req.Attribute("sn", []string{sn})
+		n := fmt.Sprintf("%s %s", gn, sn)
+		req.Attribute("cn", []string{n})
+		req.Attribute("displayName", []string{n})
+	}
+	req.Attribute("objectClass", []string{"zimbraAccount", "amavisAccount", "inetOrgPerson", "organizationalPerson"})
+	req.Attribute("zimbraAccountStatus", []string{"active"})
+	req.Attribute("zimbraId", []string{uuid.NewGenerator().Generate()})
+	return zc.conn.Add(req)
 }

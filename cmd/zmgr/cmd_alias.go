@@ -28,7 +28,7 @@ func (cmd *CmdAliasList) Run(in []string) error {
 	}
 
 	cfg := loadConfig()
-	zc, err := zimbra.Connect(cfg.Host, cfg.Port, cfg.Admin, cfg.Password)
+	zc, err := zimbra.Connect(cfg.Host, cfg.Port, cfg.Password)
 	m := log.Default.Msg
 	if err != nil {
 		m("Login failed. (%s)", err.Error())

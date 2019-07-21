@@ -11,8 +11,7 @@ type CmdSetup struct {
 	opt.DefaultHelp
 	Host     string `placeholder:"HOST" help:"Domain of the Zimbra LDAP server to configure for."`
 	Port     string `placeholder:"PORT" help:"Port for the LDAP server. Use 389 if unsure."`
-	Email    string `placeholder:"EMAIL" help:"E-mail for the admin user."`
-	Password string `placeholder:"PASSWORD" help:"Password for the admin user."`
+	Password string `placeholder:"PASSWORD" help:"Password for the LDAP root user (use Zimbra's zmldappasswd tool to set it)."`
 }
 
 func (cmd *CmdSetup) Run(in []string) error {
@@ -23,7 +22,6 @@ func (cmd *CmdSetup) Run(in []string) error {
 	cfg := Config{
 		Host:     cmd.Host,
 		Port:     cmd.Port,
-		Admin:    cmd.Email,
 		Password: cmd.Password,
 	}
 

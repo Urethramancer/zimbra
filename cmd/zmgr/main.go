@@ -10,8 +10,7 @@ import (
 var Options struct {
 	opt.DefaultHelp
 	Setup CmdSetup `command:"setup" help:"Set up basic settings."`
-	Auth  CmdAuth  `command:"authenticate" aliases:"auth,login" help:"Authenticate a user to test that it works/exists."`
-	Users CmdUsers `command:"users" aliases:"u,usr" help:"User account queries and management."`
+	User  CmdUser  `command:"user" aliases:"u,usr" help:"User account queries and management."`
 	Alias CmdAlias `command:"alias" aliases:"al" help:"Alias queries and management."`
 }
 

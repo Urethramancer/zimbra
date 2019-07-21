@@ -8,27 +8,36 @@ import (
 	"github.com/Urethramancer/zimbra"
 )
 
-type CmdUsers struct {
+// CmdUser subcommands.
+type CmdUser struct {
 	opt.DefaultHelp
-	List CmdUsersList `command:"list" aliases:"ls" help:"List user accounts."`
+	List CmdUserList `command:"list" aliases:"ls" help:"List user accounts."`
+	Add  CmdUserAdd  `command:"add" help:"Add a new user account."`
+	Del  CmdUserDel  `command:"delete" aliases:"del,rm" help:"Delete a user account."`
 }
 
-func (cmd *CmdUsers) Run(in []string) error {
+func (cmd *CmdUser) Run(in []string) error {
 	return errors.New(opt.ErrorUsage)
 }
 
-type CmdUsersList struct {
+/*
+ * Listing users.
+ */
+
+// CmdUserList subcommands.
+type CmdUserList struct {
 	opt.DefaultHelp
 	Domain string `placeholder:"DOMAIN" help:"Optional domain to limit search."`
 }
 
-func (cmd *CmdUsersList) Run(in []string) error {
+// Run the list command.
+func (cmd *CmdUserList) Run(in []string) error {
 	if cmd.Help {
 		return errors.New(opt.ErrorUsage)
 	}
 
 	cfg := loadConfig()
-	zc, err := zimbra.Connect(cfg.Host, cfg.Port, cfg.Admin, cfg.Password)
+	zc, err := zimbra.Connect(cfg.Host, cfg.Port, cfg.Password)
 	m := log.Default.Msg
 	if err != nil {
 		m("Login failed. (%s)", err.Error())
@@ -49,5 +58,59 @@ func (cmd *CmdUsersList) Run(in []string) error {
 	for _, x := range list {
 		m("%s", x)
 	}
+	return nil
+}
+
+/*
+ * Adding users.
+ */
+
+// CmdUserAdd options.
+type CmdUserAdd struct {
+	opt.DefaultHelp
+	Email     string `placeholder:"EMAIL" help:"E-mail address to create."`
+	GivenName string `placeholder:"GIVENNAME" help:"Optional first name of user."`
+	SurName   string `placeholder:"SURNAME" help:"Optional last name of user."`
+}
+
+// Run the add command.
+func (cmd *CmdUserAdd) Run(in []string) error {
+	if cmd.Help || cmd.Email == "" {
+		return errors.New(opt.ErrorUsage)
+	}
+
+	cfg := loadConfig()
+	zc, err := zimbra.Connect(cfg.Host, cfg.Port, cfg.Password)
+	m := log.Default.Msg
+	if err != nil {
+		m("Login failed. (%s)", err.Error())
+		return nil
+	}
+
+	defer zc.Close()
+	return zc.AddUser(cmd.Email, cmd.GivenName, cmd.SurName)
+}
+
+// CmdUserDel options.
+type CmdUserDel struct {
+	opt.DefaultHelp
+	Email string `placeholder:"EMAIL" help:"E-mail address to delete."`
+}
+
+// Run the delete command.
+func (cmd *CmdUserDel) Run(in []string) error {
+	if cmd.Help || cmd.Email == "" {
+		return errors.New(opt.ErrorUsage)
+	}
+
+	cfg := loadConfig()
+	zc, err := zimbra.Connect(cfg.Host, cfg.Port, cfg.Password)
+	m := log.Default.Msg
+	if err != nil {
+		m("Login failed. (%s)", err.Error())
+		return nil
+	}
+
+	defer zc.Close()
 	return nil
 }

@@ -9,8 +9,6 @@ import (
 
 // ZimbraLDAP holds an active connection to a Zimbra LDAP server.
 type ZimbraLDAP struct {
-	// User with administrator privileges.
-	User *User
 	// Address string from host and port.
 	Address string
 
@@ -19,18 +17,12 @@ type ZimbraLDAP struct {
 
 // Connect sets up a secure TCP+TLS connection to the LDAP server and tries to authenticate as the admin user.
 // If successful, a ZimbraLDAP struct is returned.
-func Connect(host, port, username, password string) (*ZimbraLDAP, error) {
-	var err error
-	u, err := NewUser(username)
-	if err != nil {
-		return nil, err
-	}
-
+func Connect(host, port, password string) (*ZimbraLDAP, error) {
 	zc := ZimbraLDAP{
-		User:    u,
 		Address: net.JoinHostPort(host, port),
 	}
 
+	var err error
 	zc.conn, err = ldap.Dial("tcp", zc.Address)
 	if err != nil {
 		return nil, err
@@ -50,12 +42,11 @@ func Connect(host, port, username, password string) (*ZimbraLDAP, error) {
 		return nil, err
 	}
 
-	u.conn = &zc
 	return &zc, nil
 }
 
 func (zc *ZimbraLDAP) bind(password string) error {
-	return zc.conn.Bind(zc.User.BindDN, password)
+	return zc.conn.Bind("cn=config", password)
 }
 
 func (zc *ZimbraLDAP) Close() {

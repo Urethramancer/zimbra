@@ -13,8 +13,6 @@ type Config struct {
 	Host string `json:"host"`
 	// Port defaults to 389.
 	Port string `json:"port"`
-	// Admin e-mail.
-	Admin string `json:"admin"`
 	// Password for the admin.
 	Password string `json:"password"`
 }
