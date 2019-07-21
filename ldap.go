@@ -100,7 +100,7 @@ func (zc *ZimbraLDAP) GetAliases(email string) ([]string, error) {
 	}
 
 	req := ldap.NewSearchRequest(u.Domain.BindDN, ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		"(&(objectClass=zimbraAccount)(uid="+u.Name+"))", []string{"dn", "cn", "mail"}, nil)
+		"(&(objectClass=zimbraAccount)(uid="+u.Name+"))", []string{"mail"}, nil)
 	res, err := zc.conn.Search(req)
 	if err != nil {
 		return nil, err
