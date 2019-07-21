@@ -38,3 +38,28 @@ func NewUser(name string) (*User, error) {
 	u.BindDN = s.String()
 	return &u, nil
 }
+
+// UserToEmail converts LDAP result format to an e-mail address.
+func UserToEmail(user string) string {
+	a := strings.Split(user, ",")
+	s := stringer.New()
+	dot := false
+	for _, x := range a {
+		t := strings.Split(x, "=")
+		if len(t) != 2 {
+			continue
+		}
+		switch t[0] {
+		case "uid":
+			s.WriteStrings(t[1], "@")
+		case "dc":
+			if dot {
+				s.WriteString(".")
+			} else {
+				dot = true
+			}
+			s.WriteString(t[1])
+		}
+	}
+	return s.String()
+}
