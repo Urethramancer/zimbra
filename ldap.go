@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"net"
 
-	"gopkg.in/ldap.v2"
+	"gopkg.in/ldap.v3"
 )
 
 // ZimbraLDAP holds an active connection to a Zimbra LDAP server.
@@ -60,56 +60,4 @@ func (zc *ZimbraLDAP) bind(password string) error {
 
 func (zc *ZimbraLDAP) Close() {
 	zc.conn.Close()
-}
-
-func (zc *ZimbraLDAP) getAccounts(scope string) ([]string, error) {
-	req := ldap.NewSearchRequest(scope, ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		"(&(objectClass=zimbraAccount))", []string{"dn", "cn"}, nil)
-	res, err := zc.conn.Search(req)
-	if err != nil {
-		return nil, err
-	}
-
-	list := []string{}
-	for _, e := range res.Entries {
-		list = append(list, UserToEmail(e.DN))
-	}
-
-	return list, nil
-}
-
-// GetUsers returns a list of all users.
-func (zc *ZimbraLDAP) GetUsers() ([]string, error) {
-	return zc.getAccounts("")
-}
-
-// GetUsers returns a list of all users in a domain.
-func (zc *ZimbraLDAP) GetUsersInDomain(domain string) ([]string, error) {
-	d, err := NewDomain(domain)
-	if err != nil {
-		return nil, err
-	}
-
-	return zc.getAccounts(d.BindDN)
-}
-
-func (zc *ZimbraLDAP) GetAliases(email string) ([]string, error) {
-	u, err := NewUser(email)
-	if err != nil {
-		return nil, err
-	}
-
-	req := ldap.NewSearchRequest(u.Domain.BindDN, ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		"(&(objectClass=zimbraAccount)(uid="+u.Name+"))", []string{"mail"}, nil)
-	res, err := zc.conn.Search(req)
-	if err != nil {
-		return nil, err
-	}
-
-	var list []string
-	for _, e := range res.Entries {
-		x := e.GetAttributeValues("mail")
-		list = append(list, x...)
-	}
-	return list, nil
 }

@@ -53,6 +53,7 @@ func (cmd *CmdAliasList) Run(in []string) error {
 				m("\t%s", a)
 			}
 		}
+		m("")
 	}
 	return nil
 }
