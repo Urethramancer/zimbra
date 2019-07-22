@@ -88,7 +88,13 @@ func (cmd *CmdUserAdd) Run(in []string) error {
 	}
 
 	defer zc.Close()
-	return zc.AddUser(cmd.Email, cmd.GivenName, cmd.SurName)
+	pw, err := zc.AddUser(cmd.Email, cmd.GivenName, cmd.SurName)
+	if err != nil {
+		return err
+	}
+
+	m("Password: %s", pw)
+	return nil
 }
 
 // CmdUserDel options.
@@ -112,5 +118,5 @@ func (cmd *CmdUserDel) Run(in []string) error {
 	}
 
 	defer zc.Close()
-	return nil
+	return zc.DelUser(cmd.Email)
 }
