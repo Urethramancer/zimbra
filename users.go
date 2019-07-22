@@ -38,11 +38,11 @@ func (zc *ZimbraLDAP) GetUsersInDomain(domain string) ([]string, error) {
 	return zc.getAccounts(d.BindDN)
 }
 
-// AddUser with one e-mail address.
-func (zc *ZimbraLDAP) AddUser(email, gn, sn string) error {
+// AddUser with one e-mail address and return the password.
+func (zc *ZimbraLDAP) AddUser(email, gn, sn string) (string, error) {
 	u, err := NewUser(email)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	req := ldap.NewAddRequest(u.BindDN, nil)
@@ -60,5 +60,25 @@ func (zc *ZimbraLDAP) AddUser(email, gn, sn string) error {
 	req.Attribute("objectClass", []string{"zimbraAccount", "amavisAccount", "inetOrgPerson", "organizationalPerson"})
 	req.Attribute("zimbraAccountStatus", []string{"active"})
 	req.Attribute("zimbraId", []string{uuid.NewGenerator().Generate()})
-	return zc.conn.Add(req)
+
+	err = zc.conn.Add(req)
+	if err != nil {
+		return "", err
+	}
+
+	pw := GenString(16)
+	pwreq := ldap.NewPasswordModifyRequest(u.BindDN, "", pw)
+	_, err = zc.conn.PasswordModify(pwreq)
+	return pw, err
+}
+
+// DelUser based on e-mail address.
+func (zc *ZimbraLDAP) DelUser(email string) error {
+	u, err := NewUser(email)
+	if err != nil {
+		return err
+	}
+
+	req := ldap.NewDelRequest(u.BindDN, nil)
+	return zc.conn.Del(req)
 }
