@@ -2,6 +2,7 @@ package zimbra
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/Urethramancer/signor/uuid"
 	"gopkg.in/ldap.v3"
@@ -60,7 +61,10 @@ func (zc *ZimbraLDAP) AddUser(email, gn, sn string) (string, error) {
 	req.Attribute("objectClass", []string{"zimbraAccount", "amavisAccount", "inetOrgPerson"})
 	req.Attribute("zimbraAccountStatus", []string{"active"})
 	req.Attribute("zimbraId", []string{uuid.NewGenerator().Generate()})
-
+	a := strings.Split(zc.Address, ":")
+	tr := fmt.Sprintf("lmtp:%s:7025", a[0])
+	req.Attribute("zimbraMailTransport", []string{tr})
+	req.Attribute("zimbraMailHost", []string{a[0]})
 	err = zc.conn.Add(req)
 	if err != nil {
 		return "", err
