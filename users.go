@@ -57,7 +57,7 @@ func (zc *ZimbraLDAP) AddUser(email, gn, sn string) (string, error) {
 		req.Attribute("cn", []string{n})
 		req.Attribute("displayName", []string{n})
 	}
-	req.Attribute("objectClass", []string{"zimbraAccount", "amavisAccount", "inetOrgPerson", "organizationalPerson"})
+	req.Attribute("objectClass", []string{"zimbraAccount", "amavisAccount", "inetOrgPerson"})
 	req.Attribute("zimbraAccountStatus", []string{"active"})
 	req.Attribute("zimbraId", []string{uuid.NewGenerator().Generate()})
 
