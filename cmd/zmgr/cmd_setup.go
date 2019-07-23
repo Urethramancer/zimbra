@@ -5,6 +5,7 @@ import (
 
 	"github.com/Urethramancer/signor/log"
 	"github.com/Urethramancer/signor/opt"
+	"github.com/Urethramancer/zimbra"
 )
 
 type CmdSetup struct {
@@ -25,11 +26,26 @@ func (cmd *CmdSetup) Run(in []string) error {
 		Password: cmd.Password,
 	}
 
-	err := saveConfig(&cfg)
+	zc, err := zimbra.Connect(cfg.Host, cfg.Port, cfg.Password, "")
 	if err != nil {
 		return err
 	}
 
-	log.Default.Msg("Settings saved to %s", configName)
+	defer zc.Close()
+	m := log.Default.Msg
+	m("Login OK.")
+
+	p, err := zc.GetLMTPPort()
+	if err != nil {
+		return err
+	}
+
+	cfg.LMTPPort = p
+	err = saveConfig(&cfg)
+	if err != nil {
+		return err
+	}
+
+	m("Settings saved to %s", configName)
 	return nil
 }

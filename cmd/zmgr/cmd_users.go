@@ -37,7 +37,7 @@ func (cmd *CmdUserList) Run(in []string) error {
 	}
 
 	cfg := loadConfig()
-	zc, err := zimbra.Connect(cfg.Host, cfg.Port, cfg.Password)
+	zc, err := zimbra.Connect(cfg.Host, cfg.Port, cfg.Password, cfg.LMTPPort)
 	m := log.Default.Msg
 	if err != nil {
 		m("Login failed. (%s)", err.Error())
@@ -80,7 +80,7 @@ func (cmd *CmdUserAdd) Run(in []string) error {
 	}
 
 	cfg := loadConfig()
-	zc, err := zimbra.Connect(cfg.Host, cfg.Port, cfg.Password)
+	zc, err := zimbra.Connect(cfg.Host, cfg.Port, cfg.Password, cfg.LMTPPort)
 	m := log.Default.Msg
 	if err != nil {
 		m("Login failed. (%s)", err.Error())
@@ -110,7 +110,7 @@ func (cmd *CmdUserDel) Run(in []string) error {
 	}
 
 	cfg := loadConfig()
-	zc, err := zimbra.Connect(cfg.Host, cfg.Port, cfg.Password)
+	zc, err := zimbra.Connect(cfg.Host, cfg.Port, cfg.Password, cfg.LMTPPort)
 	m := log.Default.Msg
 	if err != nil {
 		m("Login failed. (%s)", err.Error())

@@ -15,6 +15,8 @@ type Config struct {
 	Port string `json:"port"`
 	// Password for the admin.
 	Password string `json:"password"`
+	// LMTPPort is used in configuring the zimbraMailTransport attribute on accounts.
+	LMTPPort string `json:"lmtpport"`
 }
 
 var configName string
@@ -26,8 +28,9 @@ func init() {
 
 func loadConfig() *Config {
 	cfg := Config{
-		Host: "localhost",
-		Port: "389",
+		Host:     "localhost",
+		Port:     "389",
+		LMTPPort: "7025",
 	}
 
 	if files.FileExists(configName) {

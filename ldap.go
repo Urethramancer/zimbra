@@ -12,14 +12,16 @@ type ZimbraLDAP struct {
 	// Address string from host and port.
 	Address string
 
-	conn *ldap.Conn
+	lmtpPort string
+	conn     *ldap.Conn
 }
 
 // Connect sets up a secure TCP+TLS connection to the LDAP server and tries to authenticate as the admin user.
 // If successful, a ZimbraLDAP struct is returned.
-func Connect(host, port, password string) (*ZimbraLDAP, error) {
+func Connect(host, port, password, lmtpport string) (*ZimbraLDAP, error) {
 	zc := ZimbraLDAP{
-		Address: net.JoinHostPort(host, port),
+		Address:  net.JoinHostPort(host, port),
+		lmtpPort: lmtpport,
 	}
 
 	var err error
@@ -51,4 +53,15 @@ func (zc *ZimbraLDAP) bind(password string) error {
 
 func (zc *ZimbraLDAP) Close() {
 	zc.conn.Close()
+}
+
+func (zc *ZimbraLDAP) GetLMTPPort() (string, error) {
+	req := ldap.NewSearchRequest("cn=zimbra", ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
+		"(&(zimbraLmtpBindPort=*))", []string{"zimbraLmtpBindPort"}, nil)
+	res, err := zc.conn.Search(req)
+	if err != nil {
+		return "", err
+	}
+
+	return res.Entries[0].GetAttributeValue("zimbraLmtpBindPort"), nil
 }
