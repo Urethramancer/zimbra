@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Urethramancer/signor/log"
 	"github.com/Urethramancer/signor/uuid"
 	"gopkg.in/ldap.v3"
 )
@@ -49,6 +50,8 @@ func (zc *ZimbraLDAP) AddUser(email, gn, sn string) (string, error) {
 	req := ldap.NewAddRequest(u.BindDN, nil)
 	req.Attribute("uid", []string{u.Name})
 	req.Attribute("mail", []string{email})
+	req.Attribute("zimbraMailDeliveryAddress", []string{email})
+	req.Attribute("zimbraMailStatus", []string{"enabled"})
 	if gn != "" {
 		req.Attribute("givenName", []string{gn})
 	}
@@ -70,10 +73,14 @@ func (zc *ZimbraLDAP) AddUser(email, gn, sn string) (string, error) {
 		return "", err
 	}
 
-	pw := GenString(16)
-	pwreq := ldap.NewPasswordModifyRequest(u.BindDN, "", pw)
-	_, err = zc.conn.PasswordModify(pwreq)
-	return pw, err
+	log.Default.Msg("Setting password for %s", u.BindDN)
+	pwreq := ldap.NewPasswordModifyRequest(u.BindDN, "", "")
+	res, err := zc.conn.PasswordModify(pwreq)
+	if err != nil {
+		return "", err
+	}
+
+	return res.GeneratedPassword, nil
 }
 
 // DelUser based on e-mail address.

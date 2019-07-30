@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/Urethramancer/cross"
-
 	"github.com/Urethramancer/signor/files"
 	"github.com/Urethramancer/signor/log"
 )
